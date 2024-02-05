@@ -8,13 +8,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="" />
   </head>
+
   <body>
-    <h1>Hello world</h1>
-    <p>Here is our template</p>
-    <ul>
-      {% for lead in leads %}
-      <li>{{ lead }}</li>
-      {% endfor %}
-    </ul>
+    <a href="{% url 'leads:lead-detail' lead.pk %}">
+      Go back to {{ lead.first_name }} {{lead.last_name}}</a
+    >
+    <hr />
+    <h1>Update lead:</h1>
+    <form method="post">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit">Submit</button>
+    </form>
   </body>
 </html>
