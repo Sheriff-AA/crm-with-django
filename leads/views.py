@@ -20,6 +20,7 @@ from .forms import (
     LeadModelForm,
     CustomerUserCreationForm, 
     AssignAgentForm,
+    LeadCategoryUpdateForm,
     )
 
 # Create your views here.
@@ -185,6 +186,7 @@ def lead_delete(request, pk):
     lead.delete()
     return redirect("/leads")
 
+
 class AssignAgentView(OrganiserAndLoginRequiredMixin, FormView):
     template_name="leads/assign_agent.html"
     form_class = AssignAgentForm
@@ -225,7 +227,7 @@ class CategoryListView(LoginRequiredMixin, ListView):
                 )
 
         context.update({
-            "unassigned-lead_count": queryset.filter(category__isnull=True).count()
+            "unassigned_lead_count": queryset.filter(category__isnull=True).count()
         })
 
         return context
@@ -243,6 +245,56 @@ class CategoryListView(LoginRequiredMixin, ListView):
                 )
         
         return queryset
+    
+
+class CategoryDetailView(LoginRequiredMixin, DetailView):
+    templatename = "leads/category_detail.html"
+    context_object_name = "category"
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(CategoryDetailView, self).get_context_data(**kwargs)
+    #     # qs = Lead.objects.filter(category=self.get_object())
+    #     leads = self.get_object().leads.all()
+    #     context.update({
+    #         "leads": leads
+    #     })
+
+    #     return context
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for entire organisation
+        if user.is_organiser:
+            queryset = Category.objects.filter(
+                organisation=user.userprofile
+                )
+        else:
+            queryset = Category.objects.filter(
+                organisation=user.agent.organisation
+                )
+        
+        return queryset
+    
+
+class LeadCategoryUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = "leads/lead_category_update.html"
+    form_class = LeadCategoryUpdateForm
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for entire organisation
+        if user.is_organiser:
+            queryset = Lead.objects.filter(organisation=user.userprofile)
+        else:
+            queryset = Lead.objects.filter(organisation=user.agent.organisation)
+            # filter for the agent that is logged in
+            queryset = queryset.filter(agent__user=user)
+        
+        return queryset
+    
+    def get_success_url(self):
+        return reverse("leads:lead-detail", kwargs={"pk": self.get_object().id})
+
 
 # def lead_update(request, pk):
 #     lead = Lead.objects.get(id=pk)
