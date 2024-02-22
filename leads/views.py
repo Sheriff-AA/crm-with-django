@@ -21,6 +21,7 @@ from .forms import (
     CustomerUserCreationForm, 
     AssignAgentForm,
     LeadCategoryUpdateForm,
+    CategoryModelForm,
     )
 
 # Create your views here.
@@ -276,6 +277,64 @@ class CategoryDetailView(LoginRequiredMixin, DetailView):
                 )
         
         return queryset
+    
+
+class CategoryCreateView(OrganiserAndLoginRequiredMixin, CreateView):
+    template_name = "leads/category_create.html"
+    form_class = CategoryModelForm
+
+    def get_success_url(self):
+        return reverse("leads:category-list")
+    
+    def form_valid(self, form):
+        category = form.save(commit=False)
+        category.organisation = self.request.user.userprofile
+        category.save()
+        
+        return super(CategoryCreateView, self).form_valid(form)
+    
+
+class CategoryUpdateView(OrganiserAndLoginRequiredMixin, UpdateView):
+    template_name = "leads/category_update.html"
+    form_class = CategoryModelForm
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for entire organisation
+        if user.is_organiser:
+            queryset = Category.objects.filter(
+                organisation=user.userprofile
+                )
+        else:
+            queryset = Category.objects.filter(
+                organisation=user.agent.organisation
+                )
+        
+        return queryset
+    
+    def get_success_url(self):
+        return reverse("leads:category-list")
+
+
+class CategoryDeleteView(OrganiserAndLoginRequiredMixin, DeleteView):
+    template_name = "leads/category_delete.html"
+    
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for entire organisation
+        if user.is_organiser:
+            queryset = Category.objects.filter(
+                organisation=user.userprofile
+                )
+        else:
+            queryset = Category.objects.filter(
+                organisation=user.agent.organisation
+                )
+        
+        return queryset
+
+    def get_success_url(self):
+        return reverse("leads:category-list")
     
 
 class LeadCategoryUpdateView(LoginRequiredMixin, UpdateView):
