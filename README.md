@@ -1,4 +1,16 @@
-CUSTOMER RELATIONAL MANAGEMENT WITH DJANGO
+# CUSTOMER RELATIONAL MANAGEMENT Website. Project Documentation
+This is a simple CRM website for managing leads and agents in an organization
+
+## Overview
+
+This project is a web application built with Django, utilizing HTMX for dynamic interactions and multiple other technologies to enhance functionality. Users can manage agents and leads, assign leads to agents, and their status. Features include agent creation, leads management and status management.
+
+## Features
+
+- **Agent Management**: Create and manage agents, and add agents to your organization.
+- **Leads Management**: Manage leads created by others.
+- **Status Management**: Manage the status of your leads 
+
 
 ## Getting Started
 
